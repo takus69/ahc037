@@ -68,6 +68,14 @@ impl Solver {
                 let next = ab[i2];
                 if next.1 >= after.1 { continue; }
                 if next.1 <= opt_before.1 { continue; }
+                // 追加するbが1つ前より小さい場合はコストチェックする
+                if target_b.len() > 0 && target_b.last().unwrap() > &next.1 {
+                    let cost1 = target_b.last().unwrap() - next.1;
+                    let cost2 = after.0 - opt_before.0;
+                    if cost2 > cost1 {
+                        target_b.pop();
+                    }
+                }
                 target_b.push(next.1);
                 if target_b.len() == 3 { break; }
             }
