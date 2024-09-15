@@ -64,19 +64,23 @@ impl Solver {
             self.make(opt_before, (after.0, opt_before.1));
             // b方向で途中3つ作成
             let mut target_b: Vec<usize> = Vec::new();
+            let mut pre = after;
             for i2 in (i+1)..self.n {
                 let next = ab[i2];
                 if next.1 >= after.1 { continue; }
                 if next.1 <= opt_before.1 { continue; }
                 // 追加するbが1つ前より小さい場合はコストチェックする
-                if target_b.len() > 0 && target_b.last().unwrap() > &next.1 {
-                    let cost1 = target_b.last().unwrap() - next.1;
+                // if target_b.len() > 0 && target_b.last().unwrap() > &next.1 {
+                if target_b.len() > 0 && pre.1 > next.1 {
+                    let cost1 = pre.1 - next.1;
                     let cost2 = after.0 - opt_before.0;
                     if cost2 > cost1 {
                         target_b.pop();
                     }
+
                 }
                 target_b.push(next.1);
+                pre = next;
                 if target_b.len() == 3 { break; }
             }
             target_b.sort();
