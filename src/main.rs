@@ -36,17 +36,23 @@ impl Solver {
     }
 
     fn solve(&mut self) {
+        /*
         let mut heap: BinaryHeap<(Reverse<usize>, usize, usize)> = BinaryHeap::new();
         for &(a, b) in self.ab.iter() {
             heap.push((Reverse(a + b), a, b));
         }
+        */
         let mut ab = self.ab.clone();
         ab.sort();
-        for _ in 0..self.n {
-            let after = heap.pop().unwrap();
-            let after = (after.1, after.2);
+        // println!("{:?}", ab);
+        //for _ in 0..self.n {
+        //    let after = heap.pop().unwrap();
+        //    let after = (after.1, after.2);
+        for i in 0..self.n {
+            let after = ab[i];
             let mut opt_before = (0, 0);
             let mut opt_dist = after.0 + after.1;
+            // 移動元を決定
             for before in self.s.iter() {
                 if after.0 < before.0 || after.1 < before.1 { continue; }
                 if opt_dist > self.dist(before, &after) {
@@ -54,8 +60,24 @@ impl Solver {
                     opt_before = *before;
                 }
             }
+            // a方向に移動
             self.make(opt_before, (after.0, opt_before.1));
-            self.make((after.0, opt_before.1), after);
+            // b方向で途中3つ作成
+            let mut target_b: Vec<usize> = Vec::new();
+            for i2 in (i+1)..self.n {
+                let next = ab[i2];
+                if next.1 >= after.1 { continue; }
+                if next.1 <= opt_before.1 { continue; }
+                target_b.push(next.1);
+                if target_b.len() == 3 { break; }
+            }
+            target_b.sort();
+            let mut pre_b = opt_before.1;
+            for next_b in target_b.iter() {
+                self.make((after.0, pre_b), (after.0, *next_b));
+                pre_b = *next_b;
+            }
+            self.make((after.0, pre_b), after);
         }
         /*
         let mut pre_a = 0;
