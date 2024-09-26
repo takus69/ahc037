@@ -1,5 +1,5 @@
 use proconio::input;
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::cmp::Reverse;
 
 fn main() {
@@ -9,7 +9,8 @@ fn main() {
     }
 
     let mut solver = Solver::new(n, ab);
-    solver.solve();
+    // solver.solve();
+    solver.solve2();
     solver.ans();
 }
 
@@ -33,6 +34,48 @@ impl Solver {
         assert!(after.0 >= before.0 && after.1 >= before.1, "invalid before: {:?}, after: {:?}", before, after);
 
         after.0-before.0 + after.1-before.1
+    }
+
+    fn dist2(&self, before: &(usize, usize), after: &(usize, usize)) -> usize {
+        if after.0 >= before.0 && after.1 >= before.1 { return usize::MAX; }
+
+        after.0.abs_diff(before.0) + after.1.abs_diff(before.1)
+    }
+
+    fn solve2(&mut self) {
+        let mut maked: HashSet<(usize, usize)> = HashSet::new();
+        // 遠い点から経路を作成する
+        let mut ans: Vec<String> = Vec::new();
+        let mut heap: BinaryHeap<(usize, (usize, usize))> = BinaryHeap::new();
+        for si in self.ab.iter() {
+            heap.push((si.0 + si.1, *si));
+        }
+
+        while !heap.is_empty() {
+            let (mut opt_dist, si) = heap.pop().unwrap();
+            if maked.contains(&si) { continue; }
+            let mut nearest = (0, 0);
+            for (_, sj) in heap.iter() {
+                let dist = self.dist2(sj, &si);
+                if opt_dist > dist {
+                    opt_dist = dist;
+                    nearest = *sj;
+                }
+            }
+            let merged = (si.0.min(nearest.0), si.1.min(nearest.1));
+            if merged == nearest {
+                ans.push(self.make2(merged, si));
+            } else {
+                ans.push(self.make2(merged, si));
+                ans.push(self.make2(merged, nearest));
+                maked.insert(nearest);
+                heap.push((merged.0+merged.1, merged));
+            }
+
+        }
+
+        ans.reverse();
+        self.ans = ans;
     }
 
     fn solve(&mut self) {
@@ -100,6 +143,11 @@ impl Solver {
         for (a, b) in ab.iter() {
             self.make((*a, 0), (*a, *b));
         }*/
+    }
+
+    fn make2(&mut self, before: (usize, usize), after: (usize, usize)) -> String {
+        self.cost += after.0-before.0 + after.1-before.1;
+        format!("{} {} {} {}", before.0, before.1, after.0, after.1)
     }
 
     fn make(&mut self, before: (usize, usize), after: (usize, usize)) {
