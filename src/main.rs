@@ -42,10 +42,26 @@ impl Solver {
         after.0.abs_diff(before.0) + after.1.abs_diff(before.1)
     }
 
+    fn dist3(&self, s: &(usize, usize)) -> usize {
+        s.0 + s.1
+    }
+
     fn solve2(&mut self) {
         let mut maked: HashSet<(usize, usize)> = HashSet::new();
-        // 遠い点から経路を作成する
+        self.ab.sort();
+        self.ab.reverse();
         let mut ans: Vec<String> = Vec::new();
+        let mut si1 = &self.ab[0];
+        let mut si2 = &self.ab[1];
+        let mut opt_merged = (0, 0);
+        for si in self.ab.iter() {
+            if maked.contains(si) { continue; }
+            if self.dist3(opt_merged) > self.dist3(si) { break; }
+            for sj in self.ab.iter() {
+                let merged = (si.0.min(sj.0), si.1.min(sj.1));
+                if opt_merged
+            }
+        }
         let mut heap: BinaryHeap<(usize, (usize, usize))> = BinaryHeap::new();
         for si in self.ab.iter() {
             heap.push((si.0 + si.1, *si));
